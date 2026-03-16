@@ -2,7 +2,16 @@ import { useImage } from 'expo-image';
 import { Color, Stack, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState, useRef } from 'react';
-import { View, Text, ScrollView, StyleSheet, TextInput, Pressable, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Alert,
+  Platform,
+} from 'react-native';
 
 import { ToggleRow } from '../components/ToggleRow';
 
@@ -257,14 +266,24 @@ export default function ToolbarScreen() {
         {/* Search button */}
         <Stack.Toolbar.Button
           hidden={!showSearchButton}
-          icon="magnifyingglass"
-          tintColor={Color.ios.systemBlue}
+          icon={
+            process.env.EXPO_OS === 'ios'
+              ? 'magnifyingglass'
+              : require('../../../assets/android-icons/add.xml')
+          }
+          tintColor={Platform.select({
+            ios: Color.ios.systemBlue,
+            android: Color.android.dynamic.onSurface,
+          })}
           onPress={handleSearch}
           separateBackground={!sharesBackgroundSearchButton}
           hidesSharedBackground={hidesSharedBackgroundSearchButton}
         />
 
-        <Stack.Toolbar.Button image={image} />
+        <Stack.Toolbar.Button
+          image={image}
+          icon={require('../../../assets/android-icons/close.xml')}
+        />
 
         {/* Fixed width spacer */}
         {showFixedSpacer && (
@@ -294,7 +313,11 @@ export default function ToolbarScreen() {
         {!isSearchFocused && (
           <Stack.Toolbar.Button
             hidden={!showMicButton}
-            icon="mic"
+            icon={
+              process.env.EXPO_OS === 'ios'
+                ? 'mic'
+                : require('../../../assets/android-icons/person.xml')
+            }
             tintColor={Color.ios.systemGreen}
             onPress={handleMic}
           />
@@ -316,13 +339,19 @@ export default function ToolbarScreen() {
             style={styles.customButton}>
             <SymbolView
               size={22}
-              tintColor={Color.ios.label}
+              tintColor={Platform.select({
+                ios: Color.ios.label,
+                android: Color.android.dynamic.onSurface,
+              })}
               style={{
                 width: 22,
                 height: 22,
                 transform: [{ rotate: isSearchFocused ? '45deg' : '0deg' }],
               }}
-              name="plus"
+              name={{
+                ios: 'plus',
+                android: 'add',
+              }}
             />
           </Pressable>
         </Stack.Toolbar.View>
@@ -556,7 +585,7 @@ const styles = StyleSheet.create({
   searchInput: {
     fontSize: 16,
     width: 200,
-    height: 32,
+    height: process.env.EXPO_OS === 'ios' ? 32 : 48,
     paddingLeft: 8,
     color: Color.ios.label,
   },
